@@ -1,5 +1,6 @@
 package org.jkh.planit.service;
 
+import lombok.RequiredArgsConstructor;
 import org.jkh.planit.domain.Plan;
 import org.jkh.planit.dto.request.PlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
@@ -11,13 +12,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class PlanService implements PlanItService{
-
     private final PlanItRepository planItRepository;
-
-    public PlanService(PlanItRepository planItRepository) {
-        this.planItRepository = planItRepository;
-    }
 
     @Override
     public PlanResponse savePlan(PlanRequest request) {

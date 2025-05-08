@@ -1,5 +1,6 @@
 package org.jkh.planit.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.jkh.planit.dto.request.PlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
 import org.jkh.planit.service.PlanItService;
@@ -12,12 +13,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/plan")
+@RequiredArgsConstructor
 public class PlanController {
     private final PlanItService service;
 
-    public PlanController(PlanItService service) {
-        this.service = service;
-    }
     @PostMapping
     public ResponseEntity<PlanResponse> createPlan(@RequestBody PlanRequest request){
         return ResponseEntity

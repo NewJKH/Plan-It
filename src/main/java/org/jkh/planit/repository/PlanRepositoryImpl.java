@@ -1,5 +1,6 @@
 package org.jkh.planit.repository;
 
+import lombok.RequiredArgsConstructor;
 import org.jkh.planit.domain.Plan;
 import org.jkh.planit.dto.response.PlanResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -8,19 +9,15 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Repository
+@RequiredArgsConstructor
 public class PlanRepositoryImpl implements PlanItRepository {
     private final JdbcTemplate jdbcTemplate;
-
-    public PlanRepositoryImpl(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
 
     @Override
     public PlanResponse save(Plan plan) {

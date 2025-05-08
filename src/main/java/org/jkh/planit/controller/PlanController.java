@@ -5,10 +5,10 @@ import org.jkh.planit.dto.response.PlanResponse;
 import org.jkh.planit.service.PlanItService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/plan")
@@ -24,4 +24,18 @@ public class PlanController {
                 .status(HttpStatus.CREATED)
                 .body(service.savePlan(request));
     }
+
+    @GetMapping
+    public ResponseEntity<List<PlanResponse>> getPlans(
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String username) {
+        if (date != null) {
+            return ResponseEntity.ok(service.getPlansByDate(date));
+        } else if (username != null) {
+            return ResponseEntity.ok(service.getPlansByUsername(username));
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

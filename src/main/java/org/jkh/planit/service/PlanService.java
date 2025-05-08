@@ -9,11 +9,13 @@ import org.jkh.planit.repository.PlanRepositoryImpl;
 import org.jkh.planit.util.DateTimeUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.List;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class PlanService implements PlanItService{
@@ -54,5 +56,16 @@ public class PlanService implements PlanItService{
         return planRepositoryImpl.get(request.getScheduleId())
                 .map(plan->new PlanResponse(plan.getScheduleId(),plan.getUserId(),plan.getTitle(),plan.getContents()))
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND," 존재하지 않는 일정입니다. "));
+    }
+
+    @Override
+    public void delete(PlanRequest request) {
+        // 비밀번호 일치하는지 로직 추가
+
+        int row = planItRepository.deletePlan(request.getScheduleId());
+        if ( row == 0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+
     }
 }

@@ -14,4 +14,6 @@ public interface PlanItService {
     List<PlanResponse> getPlansByUsername(String username);
 
     PlanResponse updatePlan(PlanRequest request);
+
+    void delete(PlanRequest request);
 }

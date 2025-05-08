@@ -19,4 +19,6 @@ public interface PlanItRepository {
     List<PlanResponse> getPlansByUserId(int userId);
 
     int update(PlanRequest request);
+
+    int deletePlan(int scheduleId);
 }

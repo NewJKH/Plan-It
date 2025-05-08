@@ -70,6 +70,14 @@ public class PlanRepositoryImpl implements PlanItRepository {
                 "WHERE schedule_id = ?",plan.getContents(), new Timestamp(System.currentTimeMillis()),plan.getScheduleId());
     }
 
+    @Override
+    public int deletePlan(int scheduleId) {
+        return jdbcTemplate.update(" "+
+                "DELETE FROM schedules "+
+                "WHERE schedule_id = ?",scheduleId);
+
+    }
+
     private RowMapper<Plan> planRowMapper(){
         return (rs, rowNum) -> new Plan(
                 rs.getInt("schedule_id"),

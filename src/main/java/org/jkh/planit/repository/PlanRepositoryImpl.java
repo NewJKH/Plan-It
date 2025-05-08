@@ -2,6 +2,7 @@ package org.jkh.planit.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.jkh.planit.domain.Plan;
+import org.jkh.planit.dto.request.PlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -13,11 +14,20 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class PlanRepositoryImpl implements PlanItRepository {
     private final JdbcTemplate jdbcTemplate;
+
+    @Override
+    public Optional<Plan> get(int schedulerId) {
+        return jdbcTemplate.query(" "+
+                "SELECT * "+
+                "FROM schedules "+
+                "WHERE schedule_id = ?",planRowMapper(), schedulerId).stream().findAny();
+    }
 
     @Override
     public PlanResponse save(Plan plan) {
@@ -50,6 +60,25 @@ public class PlanRepositoryImpl implements PlanItRepository {
                 "SELECT * " +
                 "FROM schedules " +
                 "WHERE user_id = ?", planResponseRowMapper(),userId);
+    }
+
+    @Override
+    public int update(PlanRequest plan) {
+        return jdbcTemplate.update(" "+
+                "UPDATE schedules "+
+                "SET content = ?, modified_at = ?"+
+                "WHERE schedule_id = ?",plan.getContents(), new Timestamp(System.currentTimeMillis()),plan.getScheduleId());
+    }
+
+    private RowMapper<Plan> planRowMapper(){
+        return (rs, rowNum) -> new Plan(
+                rs.getInt("schedule_id"),
+                rs.getInt("user_id"),
+                rs.getString("title"),
+                rs.getString("content"),
+                rs.getTimestamp("created_at"),
+                rs.getTimestamp("modified_at")
+        );
     }
 
     private RowMapper<PlanResponse> planResponseRowMapper(){

@@ -5,8 +5,11 @@ import org.jkh.planit.domain.Plan;
 import org.jkh.planit.dto.request.PlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
 import org.jkh.planit.repository.PlanItRepository;
+import org.jkh.planit.repository.PlanRepositoryImpl;
 import org.jkh.planit.util.DateTimeUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -15,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlanService implements PlanItService{
     private final PlanItRepository planItRepository;
+    private final PlanRepositoryImpl planRepositoryImpl;
 
     @Override
     public PlanResponse savePlan(PlanRequest request) {
@@ -33,5 +37,22 @@ public class PlanService implements PlanItService{
     public List<PlanResponse> getPlansByUsername(String username) {
         // 나중에 회원 찾기 로직 추가
         return planItRepository.getPlansByUserId(Integer.parseInt(username));
+    }
+
+    @Override
+    public PlanResponse updatePlan(PlanRequest request) {
+        if ( request.getContents().isEmpty() ){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        // 비밀번호 일치 확인 로직
+
+        int row = planItRepository.update(request);
+        if ( row == 0 ){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND," 수정할 대상이 없습니다. ");
+        }
+
+        return planRepositoryImpl.get(request.getScheduleId())
+                .map(plan->new PlanResponse(plan.getScheduleId(),plan.getUserId(),plan.getTitle(),plan.getContents()))
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND," 존재하지 않는 일정입니다. "));
     }
 }

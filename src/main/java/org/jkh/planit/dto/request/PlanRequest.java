@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class PlanRequest {
+    private int scheduleId;
     private int userId;
     private String userPw;
     private String title;

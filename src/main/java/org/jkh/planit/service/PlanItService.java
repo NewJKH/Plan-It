@@ -12,4 +12,6 @@ public interface PlanItService {
     List<PlanResponse> getPlansByDate(String date);
 
     List<PlanResponse> getPlansByUsername(String username);
+
+    PlanResponse updatePlan(PlanRequest request);
 }

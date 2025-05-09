@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.jkh.planit.dto.request.PlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
 import org.jkh.planit.service.PlanItService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +40,22 @@ public class PlanController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
+
+    @GetMapping
+    public ResponseEntity<Page<PlanResponse>> getPlans(
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String username,
+            @PageableDefault(size = 10, sort = "created_at", direction = Sort.Direction.DESC) Pageable pageable) {
+        if (date != null) {
+            return ResponseEntity
+                    .ok(service.getPlansByDate(date, pageable));
+        } else if (username != null) {
+            return ResponseEntity
+                    .ok(service.getPlansByUsername(username, pageable));
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+}
 
     @PatchMapping
     public ResponseEntity<PlanResponse> updatePlan(@RequestBody PlanRequest request) {

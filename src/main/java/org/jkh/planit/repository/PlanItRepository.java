@@ -3,6 +3,8 @@ package org.jkh.planit.repository;
 import org.jkh.planit.domain.Plan;
 import org.jkh.planit.dto.request.PlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -15,8 +17,10 @@ public interface PlanItRepository {
     PlanResponse save(Plan plan);
 
     List<PlanResponse> getPlansByDate(Timestamp timestamp);
+    Page<PlanResponse> getPlansByDate(Timestamp timestamp, Pageable pageable);
 
     List<PlanResponse> getPlansByUserId(int userId);
+    Page<PlanResponse> getPlansByUserId(int userId,  Pageable pageable);
 
     int update(PlanRequest request);
 

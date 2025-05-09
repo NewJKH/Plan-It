@@ -34,7 +34,8 @@ public class UserRepository {
                 rs.getInt("user_id"),
                 rs.getString("user_pw_hash"),
                 rs.getString("username"),
-                rs.getTimestamp("created_at")
+                rs.getTimestamp("created_at"),
+                rs.getString("email")
         );
     }
 }

@@ -13,6 +13,8 @@ import org.jkh.planit.repository.PlanItRepository;
 import org.jkh.planit.repository.PlanRepositoryImpl;
 import org.jkh.planit.repository.UserRepository;
 import org.jkh.planit.util.DateTimeUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,9 +44,22 @@ public class PlanService implements PlanItService{
     }
 
     @Override
+    public Page<PlanResponse> getPlansByDate(String date, Pageable pageable) {
+        Timestamp timestamp = DateTimeUtil.toTimestamp(date);
+        return planItRepository.getPlansByDate(timestamp,pageable);
+    }
+
+    @Override
     public List<PlanResponse> getPlansByUsername(String username) {
         return userRepository.findByUsername(username)
                 .map(user-> planItRepository.getPlansByUserId(user.getUserId()))
+                .orElseThrow(UserNotFoundException::new);
+    }
+
+    @Override
+    public Page<PlanResponse> getPlansByUsername(String username, Pageable pageable) {
+        return userRepository.findByUsername(username)
+                .map(user-> planItRepository.getPlansByUserId(user.getUserId(),pageable))
                 .orElseThrow(UserNotFoundException::new);
     }
 

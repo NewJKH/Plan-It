@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.jkh.planit.domain.Plan;
 import org.jkh.planit.dto.request.PlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -39,7 +42,7 @@ public class PlanRepositoryImpl implements PlanItRepository {
         param.put("title",plan.getTitle());
         param.put("content",plan.getContents());
         param.put("user_id",plan.getUserId());
-        param.put("create_at",plan.getCreateDate());
+        param.put("created_at",plan.getCreateDate());
         param.put("modified_at",plan.getModifyDate());
         Number key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource(param));
 
@@ -55,11 +58,49 @@ public class PlanRepositoryImpl implements PlanItRepository {
     }
 
     @Override
+    public Page<PlanResponse> getPlansByDate(Timestamp timestamp, Pageable pageable) {
+        int pageSize = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+
+        List<PlanResponse> list = jdbcTemplate.query(" "+
+                "SELECT * " +
+                "FROM schedules " +
+                "WHERE created_at > ? " +
+                "ORDER BY created_at DESC LIMIT ? OFFSET ?", planResponseRowMapper(),timestamp,pageSize,offset);
+
+        int total = jdbcTemplate.queryForObject(" " +
+                "SELECT COUNT(*) " +
+                "FROM schedules " +
+                "WHERE created_at > ?", Integer.class, timestamp);
+
+        return new PageImpl<>(list,pageable,total);
+    }
+
+    @Override
     public List<PlanResponse> getPlansByUserId(int userId) {
         return jdbcTemplate.query(" "+
                 "SELECT * " +
                 "FROM schedules " +
                 "WHERE user_id = ?", planResponseRowMapper(),userId);
+    }
+
+    @Override
+    public Page<PlanResponse> getPlansByUserId(int userId, Pageable pageable) {
+        int pageSize = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+
+        List<PlanResponse> list = jdbcTemplate.query(" "+
+                "SELECT * " +
+                "FROM schedules " +
+                "WHERE user_id = ? " +
+                "ORDER BY schedule_id LIMIT ? OFFSET ?", planResponseRowMapper(),userId,pageSize,offset);
+
+        int total = jdbcTemplate.queryForObject(" " +
+                "SELECT COUNT(*) " +
+                "FROM schedules " +
+                "WHERE created_at > ?", Integer.class, userId);
+
+        return new PageImpl<>(list,pageable,total);
     }
 
     @Override

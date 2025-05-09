@@ -6,6 +6,7 @@ import org.jkh.planit.domain.User;
 import org.jkh.planit.dto.request.PlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
 import org.jkh.planit.exception.EmptyContentException;
+import org.jkh.planit.exception.NotMatchedPasswordException;
 import org.jkh.planit.exception.PlanNotFoundException;
 import org.jkh.planit.exception.UserNotFoundException;
 import org.jkh.planit.repository.PlanItRepository;
@@ -76,7 +77,7 @@ public class PlanService implements PlanItService{
         }
         User user = userOpt.get();
         if ( !validatePw(user.getUserPwHash(), request.getUserPw())){
-            throw new UserNotFoundException(" 임시 ) 비밀번호 일치하지 않음 오류 "+request.getUserPw().hashCode());
+            throw new NotMatchedPasswordException();
         }
 
         int row = planItRepository.deletePlan(request.getScheduleId());
@@ -84,6 +85,7 @@ public class PlanService implements PlanItService{
             throw new PlanNotFoundException();
         }
     }
+
     private boolean validatePw(String userPwHash, String requestPw){
         int request = requestPw.hashCode();
 

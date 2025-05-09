@@ -12,4 +12,5 @@ public class User {
     private String userPwHash;
     private String username;
     private final Timestamp createAt;
+    private String email;
 }

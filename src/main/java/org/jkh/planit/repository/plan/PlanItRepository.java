@@ -1,4 +1,4 @@
-package org.jkh.planit.repository;
+package org.jkh.planit.repository.plan;
 
 import org.jkh.planit.domain.Plan;
 import org.jkh.planit.dto.request.PlanRequest;

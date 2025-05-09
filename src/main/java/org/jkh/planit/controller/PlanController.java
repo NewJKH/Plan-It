@@ -44,8 +44,6 @@ public class PlanController {
                 .body(service.updatePlan(request));
     }
 
-
-
     @PostMapping("/delete")
     public String deletePlan(@RequestBody PlanRequest request){
         service.delete(request);

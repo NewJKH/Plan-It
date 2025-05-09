@@ -47,6 +47,6 @@ public class PlanController {
     @PostMapping("/delete")
     public String deletePlan(@RequestBody PlanRequest request){
         service.delete(request);
-        return request.getTitle()+" 이 삭제되었습니다.";
+        return "일정이 삭제되었습니다.";
     }
 }

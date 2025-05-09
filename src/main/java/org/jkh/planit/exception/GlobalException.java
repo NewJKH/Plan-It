@@ -16,8 +16,14 @@ public class GlobalException {
     public ResponseEntity<String> handlePlanNotFound(PlanNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
+
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<String> handlePlanNotFound(UserNotFoundException e) {
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(NotMatchedPasswordException.class)
+    public ResponseEntity<String> handlePwNotMatched(NotMatchedPasswordException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }

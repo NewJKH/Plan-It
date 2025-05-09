@@ -12,10 +12,8 @@ import org.jkh.planit.repository.PlanItRepository;
 import org.jkh.planit.repository.PlanRepositoryImpl;
 import org.jkh.planit.repository.UserRepository;
 import org.jkh.planit.util.DateTimeUtil;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -83,7 +81,7 @@ public class PlanService implements PlanItService{
 
         int row = planItRepository.deletePlan(request.getScheduleId());
         if ( row == 0){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new PlanNotFoundException();
         }
     }
     private boolean validatePw(String userPwHash, String requestPw){

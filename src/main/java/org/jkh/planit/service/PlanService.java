@@ -66,6 +66,5 @@ public class PlanService implements PlanItService{
         if ( row == 0){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-
     }
 }

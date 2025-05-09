@@ -1,4 +1,4 @@
-package org.jkh.planit.repository.plan;
+package org.jkh.planit.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.jkh.planit.domain.Plan;

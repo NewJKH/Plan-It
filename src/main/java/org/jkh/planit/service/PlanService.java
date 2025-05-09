@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.jkh.planit.domain.Plan;
 import org.jkh.planit.dto.request.PlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
+import org.jkh.planit.exception.EmptyContentException;
+import org.jkh.planit.exception.PlanNotFoundException;
 import org.jkh.planit.repository.PlanItRepository;
 import org.jkh.planit.repository.PlanRepositoryImpl;
 import org.jkh.planit.util.DateTimeUtil;
@@ -43,20 +45,24 @@ public class PlanService implements PlanItService{
 
     @Override
     public PlanResponse updatePlan(PlanRequest request) {
-        if ( request.getContents().isEmpty() ){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (request.getContents().isEmpty()) {
+            throw new EmptyContentException();
         }
-        // 비밀번호 일치 확인 로직
 
         int row = planItRepository.update(request);
-        if ( row == 0 ){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND," 수정할 대상이 없습니다. ");
+        if (row == 0) {
+            throw new PlanNotFoundException();
         }
 
         return planRepositoryImpl.get(request.getScheduleId())
-                .map(plan->new PlanResponse(plan.getScheduleId(),plan.getUserId(),plan.getTitle(),plan.getContents()))
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND," 존재하지 않는 일정입니다. "));
+                .map(plan -> new PlanResponse(
+                        plan.getScheduleId(),
+                        plan.getUserId(),
+                        plan.getTitle(),
+                        plan.getContents()))
+                .orElseThrow(() -> new PlanNotFoundException("존재하지 않는 일정입니다."));
     }
+
 
     @Override
     public void delete(PlanRequest request) {

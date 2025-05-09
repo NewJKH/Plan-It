@@ -3,8 +3,6 @@ package org.jkh.planit.controller;
 import lombok.RequiredArgsConstructor;
 import org.jkh.planit.dto.request.PlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
-import org.jkh.planit.exception.EmptyContentException;
-import org.jkh.planit.exception.PlanNotFoundException;
 import org.jkh.planit.service.PlanItService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,15 +44,7 @@ public class PlanController {
                 .body(service.updatePlan(request));
     }
 
-    @ExceptionHandler(EmptyContentException.class)
-    public ResponseEntity<String> handleEmptyContent(EmptyContentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
 
-    @ExceptionHandler(PlanNotFoundException.class)
-    public ResponseEntity<String> handleNotFound(PlanNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-    }
 
     @PostMapping("/delete")
     public String deletePlan(@RequestBody PlanRequest request){

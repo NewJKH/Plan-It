@@ -16,4 +16,8 @@ public class GlobalException {
     public ResponseEntity<String> handlePlanNotFound(PlanNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handlePlanNotFound(UserNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
 }

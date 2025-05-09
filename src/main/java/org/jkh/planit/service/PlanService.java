@@ -2,12 +2,15 @@ package org.jkh.planit.service;
 
 import lombok.RequiredArgsConstructor;
 import org.jkh.planit.domain.Plan;
+import org.jkh.planit.domain.User;
 import org.jkh.planit.dto.request.PlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
 import org.jkh.planit.exception.EmptyContentException;
 import org.jkh.planit.exception.PlanNotFoundException;
+import org.jkh.planit.exception.UserNotFoundException;
 import org.jkh.planit.repository.PlanItRepository;
 import org.jkh.planit.repository.PlanRepositoryImpl;
+import org.jkh.planit.repository.UserRepository;
 import org.jkh.planit.util.DateTimeUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @Service
@@ -23,6 +27,7 @@ import java.util.List;
 public class PlanService implements PlanItService{
     private final PlanItRepository planItRepository;
     private final PlanRepositoryImpl planRepositoryImpl;
+    private final UserRepository userRepository;
 
     @Override
     public PlanResponse savePlan(PlanRequest request) {
@@ -39,8 +44,9 @@ public class PlanService implements PlanItService{
 
     @Override
     public List<PlanResponse> getPlansByUsername(String username) {
-        // 나중에 회원 찾기 로직 추가
-        return planItRepository.getPlansByUserId(Integer.parseInt(username));
+        return userRepository.findByUsername(username)
+                .map(user-> planItRepository.getPlansByUserId(user.getUserId()))
+                .orElseThrow(UserNotFoundException::new);
     }
 
     @Override
@@ -66,11 +72,24 @@ public class PlanService implements PlanItService{
 
     @Override
     public void delete(PlanRequest request) {
-        // 비밀번호 일치하는지 로직 추가
+        Optional<User> userOpt = userRepository.findById(request.getUserId());
+        if ( userOpt.isEmpty()){
+            throw new UserNotFoundException();
+        }
+        User user = userOpt.get();
+        if ( !validatePw(user.getUserPwHash(), request.getUserPw())){
+            throw new UserNotFoundException(" 임시 ) 비밀번호 일치하지 않음 오류 "+request.getUserPw().hashCode());
+        }
 
         int row = planItRepository.deletePlan(request.getScheduleId());
         if ( row == 0){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+    }
+    private boolean validatePw(String userPwHash, String requestPw){
+        int request = requestPw.hashCode();
+
+        String v = String.valueOf(request);
+        return userPwHash.equals(v);
     }
 }

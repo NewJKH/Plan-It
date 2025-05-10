@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreatePlanRequest {
     private int userId;
-    private String userPw;
     private String title;
     private String contents;
 }

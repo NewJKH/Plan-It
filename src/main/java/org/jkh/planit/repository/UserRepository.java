@@ -18,7 +18,7 @@ public class UserRepository {
                         "SELECT * " +
                         "FROM users " +
                         "WHERE user_id = ?",userRowMapper(),userId).stream()
-                .findAny();
+                .findFirst();
     }
 
     public Optional<User> findByUsername(String username){
@@ -26,7 +26,7 @@ public class UserRepository {
                         "SELECT * " +
                         "FROM users " +
                         "WHERE username = ?",userRowMapper(),username).stream()
-                .findAny();
+                .findFirst();
     }
 
     private RowMapper<User> userRowMapper(){

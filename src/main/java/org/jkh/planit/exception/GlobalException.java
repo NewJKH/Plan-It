@@ -26,4 +26,9 @@ public class GlobalException {
     public ResponseEntity<String> handlePwNotMatched(NotMatchedPasswordException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
+
+    @ExceptionHandler(UserNotMatchedException.class)
+    public ResponseEntity<String> handlePwNotMatched(UserNotMatchedException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
 }

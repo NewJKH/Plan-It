@@ -7,12 +7,8 @@ import org.jkh.planit.dto.request.CreatePlanRequest;
 import org.jkh.planit.dto.request.DeletePlanRequest;
 import org.jkh.planit.dto.request.UpdatePlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
-import org.jkh.planit.exception.EmptyContentException;
-import org.jkh.planit.exception.NotMatchedPasswordException;
-import org.jkh.planit.exception.PlanNotFoundException;
-import org.jkh.planit.exception.UserNotFoundException;
+import org.jkh.planit.exception.*;
 import org.jkh.planit.repository.PlanItRepository;
-import org.jkh.planit.repository.PlanRepositoryImpl;
 import org.jkh.planit.repository.UserRepository;
 import org.jkh.planit.util.DateTimeUtil;
 import org.springframework.data.domain.Page;
@@ -29,7 +25,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PlanService implements PlanItService{
     private final PlanItRepository planItRepository;
-    private final PlanRepositoryImpl planRepositoryImpl;
     private final UserRepository userRepository;
 
     @Override
@@ -75,7 +70,7 @@ public class PlanService implements PlanItService{
             throw new PlanNotFoundException();
         }
 
-        return planRepositoryImpl.get(request.getScheduleId())
+        return planItRepository.get(request.getScheduleId())
                 .map(plan -> new PlanResponse(
                         plan.getScheduleId(),
                         plan.getUserId(),
@@ -87,6 +82,15 @@ public class PlanService implements PlanItService{
 
     @Override
     public void delete(DeletePlanRequest request) {
+        Optional<Plan> planOpt = planItRepository.get(request.getScheduleId());
+        if ( planOpt.isEmpty() ){
+            throw new PlanNotFoundException();
+        }
+        Plan plan = planOpt.get();
+        if ( plan.getUserId() != request.getUserId() ){
+            throw new UserNotMatchedException();
+        }
+
         Optional<User> userOpt = userRepository.findById(request.getUserId());
         if ( userOpt.isEmpty()){
             throw new UserNotFoundException();

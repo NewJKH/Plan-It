@@ -3,7 +3,9 @@ package org.jkh.planit.service;
 import lombok.RequiredArgsConstructor;
 import org.jkh.planit.domain.Plan;
 import org.jkh.planit.domain.User;
-import org.jkh.planit.dto.request.PlanRequest;
+import org.jkh.planit.dto.request.CreatePlanRequest;
+import org.jkh.planit.dto.request.DeletePlanRequest;
+import org.jkh.planit.dto.request.UpdatePlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
 import org.jkh.planit.exception.EmptyContentException;
 import org.jkh.planit.exception.NotMatchedPasswordException;
@@ -31,9 +33,8 @@ public class PlanService implements PlanItService{
     private final UserRepository userRepository;
 
     @Override
-    public PlanResponse savePlan(PlanRequest request) {
+    public PlanResponse savePlan(CreatePlanRequest request) {
         Plan plan = new Plan(request.getUserId(), request.getTitle(), request.getContents());
-
         return planItRepository.save(plan);
     }
 
@@ -64,7 +65,7 @@ public class PlanService implements PlanItService{
     }
 
     @Override
-    public PlanResponse updatePlan(PlanRequest request) {
+    public PlanResponse updatePlan(UpdatePlanRequest request) {
         if (request.getContents().isEmpty()) {
             throw new EmptyContentException();
         }
@@ -85,7 +86,7 @@ public class PlanService implements PlanItService{
 
 
     @Override
-    public void delete(PlanRequest request) {
+    public void delete(DeletePlanRequest request) {
         Optional<User> userOpt = userRepository.findById(request.getUserId());
         if ( userOpt.isEmpty()){
             throw new UserNotFoundException();

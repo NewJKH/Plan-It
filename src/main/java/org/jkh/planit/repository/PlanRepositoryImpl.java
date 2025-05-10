@@ -2,7 +2,7 @@ package org.jkh.planit.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.jkh.planit.domain.Plan;
-import org.jkh.planit.dto.request.PlanRequest;
+import org.jkh.planit.dto.request.UpdatePlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -104,11 +104,11 @@ public class PlanRepositoryImpl implements PlanItRepository {
     }
 
     @Override
-    public int update(PlanRequest plan) {
+    public int update(UpdatePlanRequest plan) {
         return jdbcTemplate.update(" "+
                 "UPDATE schedules "+
                 "SET content = ?, modified_at = ?"+
-                "WHERE schedule_id = ?",plan.getContents(), new Timestamp(System.currentTimeMillis()),plan.getScheduleId());
+                "WHERE schedule_id = ?",plan.getContents(), new Timestamp(System.currentTimeMillis()), plan.getScheduleId());
     }
 
     @Override

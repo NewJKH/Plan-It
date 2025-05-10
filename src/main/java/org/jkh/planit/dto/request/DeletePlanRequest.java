@@ -5,10 +5,8 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class PlanRequest {
+public class DeletePlanRequest {
     private int scheduleId;
     private int userId;
     private String userPw;
-    private String title;
-    private String contents;
 }

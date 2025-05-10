@@ -1,7 +1,7 @@
 package org.jkh.planit.repository;
 
 import org.jkh.planit.domain.Plan;
-import org.jkh.planit.dto.request.PlanRequest;
+import org.jkh.planit.dto.request.UpdatePlanRequest;
 import org.jkh.planit.dto.response.PlanResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +22,7 @@ public interface PlanItRepository {
     List<PlanResponse> getPlansByUserId(int userId);
     Page<PlanResponse> getPlansByUserId(int userId,  Pageable pageable);
 
-    int update(PlanRequest request);
+    int update(UpdatePlanRequest request);
 
     int deletePlan(int scheduleId);
 }

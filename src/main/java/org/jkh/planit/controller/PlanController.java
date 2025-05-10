@@ -59,7 +59,7 @@ public class PlanController {
 }
 
     @PatchMapping
-    public ResponseEntity<PlanResponse> updatePlan(@RequestBody UpdatePlanRequest request) {
+    public ResponseEntity<PlanResponse> updatePlan(@Valid @RequestBody UpdatePlanRequest request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(service.updatePlan(request));

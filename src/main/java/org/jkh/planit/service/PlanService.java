@@ -1,0 +1,115 @@
+package org.jkh.planit.service;
+
+import lombok.RequiredArgsConstructor;
+import org.jkh.planit.domain.Plan;
+import org.jkh.planit.domain.User;
+import org.jkh.planit.dto.request.CreatePlanRequest;
+import org.jkh.planit.dto.request.DeletePlanRequest;
+import org.jkh.planit.dto.request.UpdatePlanRequest;
+import org.jkh.planit.dto.response.PlanResponse;
+import org.jkh.planit.exception.*;
+import org.jkh.planit.repository.PlanItRepository;
+import org.jkh.planit.repository.UserRepository;
+import org.jkh.planit.util.DateTimeUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Optional;
+
+@Transactional
+@Service
+@RequiredArgsConstructor
+public class PlanService implements PlanItService{
+    private final PlanItRepository planItRepository;
+    private final UserRepository userRepository;
+
+    @Override
+    public PlanResponse savePlan(CreatePlanRequest request) {
+        Plan plan = new Plan(request.getUserId(), request.getTitle(), request.getContents());
+        return planItRepository.save(plan);
+    }
+
+    @Override
+    public List<PlanResponse> getPlansByDate(String date) {
+        Timestamp timestamp = DateTimeUtil.toTimestamp(date);
+        return planItRepository.getPlansByDate(timestamp);
+    }
+
+    @Override
+    public Page<PlanResponse> getPlansByDate(String date, Pageable pageable) {
+        Timestamp timestamp = DateTimeUtil.toTimestamp(date);
+        return planItRepository.getPlansByDate(timestamp,pageable);
+    }
+
+    @Override
+    public List<PlanResponse> getPlansByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .map(user-> planItRepository.getPlansByUserId(user.getUserId()))
+                .orElseThrow(UserNotFoundException::new);
+    }
+
+    @Override
+    public Page<PlanResponse> getPlansByUsername(String username, Pageable pageable) {
+        return userRepository.findByUsername(username)
+                .map(user-> planItRepository.getPlansByUserId(user.getUserId(),pageable))
+                .orElseThrow(UserNotFoundException::new);
+    }
+
+    @Override
+    public PlanResponse updatePlan(UpdatePlanRequest request) {
+        if (request.getContents().isEmpty()) {
+            throw new EmptyContentException();
+        }
+
+        int row = planItRepository.update(request);
+        if (row == 0) {
+            throw new PlanNotFoundException();
+        }
+
+        return planItRepository.get(request.getScheduleId())
+                .map(plan -> new PlanResponse(
+                        plan.getScheduleId(),
+                        plan.getUserId(),
+                        plan.getTitle(),
+                        plan.getContents()))
+                .orElseThrow(() -> new PlanNotFoundException("존재하지 않는 일정입니다."));
+    }
+
+
+    @Override
+    public void delete(DeletePlanRequest request) {
+        Optional<Plan> planOpt = planItRepository.get(request.getScheduleId());
+        if ( planOpt.isEmpty() ){
+            throw new PlanNotFoundException();
+        }
+        Plan plan = planOpt.get();
+        if ( plan.getUserId() != request.getUserId() ){
+            throw new UserNotMatchedException();
+        }
+
+        Optional<User> userOpt = userRepository.findById(request.getUserId());
+        if ( userOpt.isEmpty()){
+            throw new UserNotFoundException();
+        }
+        User user = userOpt.get();
+        if ( !validatePw(user.getUserPwHash(), request.getUserPw())){
+            throw new NotMatchedPasswordException();
+        }
+
+        int row = planItRepository.deletePlan(request.getScheduleId());
+        if ( row == 0){
+            throw new PlanNotFoundException();
+        }
+    }
+
+    private boolean validatePw(String userPwHash, String requestPw){
+        int request = requestPw.hashCode();
+
+        String v = String.valueOf(request);
+        return userPwHash.equals(v);
+    }
+}

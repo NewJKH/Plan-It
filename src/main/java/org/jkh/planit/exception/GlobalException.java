@@ -1,0 +1,34 @@
+package org.jkh.planit.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class GlobalException {
+    @ExceptionHandler(EmptyContentException.class)
+    public ResponseEntity<String> handleEmptyContent(EmptyContentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
+    @ExceptionHandler(PlanNotFoundException.class)
+    public ResponseEntity<String> handlePlanNotFound(PlanNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(NotMatchedPasswordException.class)
+    public ResponseEntity<String> handlePwNotMatched(NotMatchedPasswordException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(UserNotMatchedException.class)
+    public ResponseEntity<String> handlePwNotMatched(UserNotMatchedException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+}

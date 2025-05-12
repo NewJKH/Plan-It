@@ -1,5 +1,6 @@
 package org.jkh.planit.domain;
 
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,5 +13,7 @@ public class User {
     private String userPwHash;
     private String username;
     private final Timestamp createAt;
+
+    @Email
     private String email;
 }

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.Optional;
 
 @Transactional
@@ -34,22 +33,9 @@ public class PlanService implements PlanItService{
     }
 
     @Override
-    public List<PlanResponse> getPlansByDate(String date) {
-        Timestamp timestamp = DateTimeUtil.toTimestamp(date);
-        return planItRepository.getPlansByDate(timestamp);
-    }
-
-    @Override
     public Page<PlanResponse> getPlansByDate(String date, Pageable pageable) {
         Timestamp timestamp = DateTimeUtil.toTimestamp(date);
         return planItRepository.getPlansByDate(timestamp,pageable);
-    }
-
-    @Override
-    public List<PlanResponse> getPlansByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .map(user-> planItRepository.getPlansByUserId(user.getUserId()))
-                .orElseThrow(UserNotFoundException::new);
     }
 
     @Override

@@ -28,19 +28,6 @@ public class PlanController {
                 .status(HttpStatus.CREATED)
                 .body(service.savePlan(request));
     }
-//
-//    @GetMapping
-//    public ResponseEntity<List<PlanResponse>> getPlans(
-//            @RequestParam(required = false) String date,
-//            @RequestParam(required = false) String username) {
-//        if (date != null) {
-//            return ResponseEntity.ok(service.getPlansByDate(date));
-//        } else if (username != null) {
-//            return ResponseEntity.ok(service.getPlansByUsername(username));
-//        } else {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//        }
-//    }
 
     @GetMapping
     public ResponseEntity<Page<PlanResponse>> getPlans(

@@ -1,7 +1,7 @@
 package org.jkh.planit.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.jkh.planit.domain.User;
+import org.jkh.planit.entity.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;

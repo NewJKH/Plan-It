@@ -1,9 +1,9 @@
 package org.jkh.planit.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.jkh.planit.domain.Plan;
-import org.jkh.planit.dto.request.UpdatePlanRequest;
-import org.jkh.planit.dto.response.PlanResponse;
+import org.jkh.planit.dto.request.PlanItUpdateRequest;
+import org.jkh.planit.dto.response.PlanItResponse;
+import org.jkh.planit.entity.Plan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +21,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class PlanRepositoryImpl implements PlanItRepository {
+public class PlanItRepositoryImpl implements PlanItRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -33,7 +33,7 @@ public class PlanRepositoryImpl implements PlanItRepository {
     }
 
     @Override
-    public PlanResponse save(Plan plan) {
+    public PlanItResponse save(Plan plan) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
 
         simpleJdbcInsert.withTableName("schedules").usingGeneratedKeyColumns("schedule_id");
@@ -46,11 +46,11 @@ public class PlanRepositoryImpl implements PlanItRepository {
         param.put("modified_at",plan.getModifyDate());
         Number key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource(param));
 
-        return new PlanResponse(key.intValue(),plan.getUserId(), plan.getTitle(), plan.getContents());
+        return new PlanItResponse(key.intValue(),plan.getUserId(), plan.getTitle(), plan.getContents());
     }
 
     @Override
-    public List<PlanResponse> getPlansByDate(Timestamp timestamp) {
+    public List<PlanItResponse> getPlansByDate(Timestamp timestamp) {
         return jdbcTemplate.query(" "+
                 "SELECT * " +
                 "FROM schedules " +
@@ -58,11 +58,11 @@ public class PlanRepositoryImpl implements PlanItRepository {
     }
 
     @Override
-    public Page<PlanResponse> getPlansByDate(Timestamp timestamp, Pageable pageable) {
+    public Page<PlanItResponse> getPlansByDate(Timestamp timestamp, Pageable pageable) {
         int pageSize = pageable.getPageSize();
         int offset = (int) pageable.getOffset();
 
-        List<PlanResponse> list = jdbcTemplate.query(" "+
+        List<PlanItResponse> list = jdbcTemplate.query(" "+
                 "SELECT * " +
                 "FROM schedules " +
                 "WHERE created_at > ? " +
@@ -77,7 +77,7 @@ public class PlanRepositoryImpl implements PlanItRepository {
     }
 
     @Override
-    public List<PlanResponse> getPlansByUserId(int userId) {
+    public List<PlanItResponse> getPlansByUserId(int userId) {
         return jdbcTemplate.query(" "+
                 "SELECT * " +
                 "FROM schedules " +
@@ -85,11 +85,11 @@ public class PlanRepositoryImpl implements PlanItRepository {
     }
 
     @Override
-    public Page<PlanResponse> getPlansByUserId(int userId, Pageable pageable) {
+    public Page<PlanItResponse> getPlansByUserId(int userId, Pageable pageable) {
         int pageSize = pageable.getPageSize();
         int offset = (int) pageable.getOffset();
 
-        List<PlanResponse> list = jdbcTemplate.query(" "+
+        List<PlanItResponse> list = jdbcTemplate.query(" "+
                 "SELECT * " +
                 "FROM schedules " +
                 "WHERE user_id = ? " +
@@ -104,7 +104,7 @@ public class PlanRepositoryImpl implements PlanItRepository {
     }
 
     @Override
-    public int update(UpdatePlanRequest plan) {
+    public int update(PlanItUpdateRequest plan) {
         return jdbcTemplate.update(" "+
                 "UPDATE schedules "+
                 "SET content = ?, modified_at = ?"+
@@ -130,8 +130,8 @@ public class PlanRepositoryImpl implements PlanItRepository {
         );
     }
 
-    private RowMapper<PlanResponse> planResponseRowMapper(){
-        return (rs, rowNum) -> new PlanResponse(
+    private RowMapper<PlanItResponse> planResponseRowMapper(){
+        return (rs, rowNum) -> new PlanItResponse(
                 rs.getInt("schedule_id"),
                 rs.getInt("user_id"),
                 rs.getString("title"),

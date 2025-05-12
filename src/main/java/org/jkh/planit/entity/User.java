@@ -1,4 +1,4 @@
-package org.jkh.planit.domain;
+package org.jkh.planit.entity;
 
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;

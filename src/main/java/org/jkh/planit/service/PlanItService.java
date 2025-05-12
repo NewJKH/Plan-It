@@ -1,21 +1,19 @@
 package org.jkh.planit.service;
 
-import org.jkh.planit.dto.request.CreatePlanRequest;
-import org.jkh.planit.dto.request.DeletePlanRequest;
-import org.jkh.planit.dto.request.UpdatePlanRequest;
-import org.jkh.planit.dto.response.PlanResponse;
+import org.jkh.planit.dto.request.PlanItCreateRequest;
+import org.jkh.planit.dto.request.PlanItDeleteRequest;
+import org.jkh.planit.dto.request.PlanItUpdateRequest;
+import org.jkh.planit.dto.response.PlanItResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface PlanItService {
 
-    PlanResponse savePlan(CreatePlanRequest request);
+    PlanItResponse savePlan(PlanItCreateRequest request);
 
-    Page<PlanResponse> getPlansByDate(String date, Pageable pageable);
+    Page<PlanItResponse> getPlans(String date, String username,Pageable pageable);
 
-    Page<PlanResponse> getPlansByUsername(String username, Pageable pageable);
+    PlanItResponse updatePlan(PlanItUpdateRequest request);
 
-    PlanResponse updatePlan(UpdatePlanRequest request);
-
-    void delete(DeletePlanRequest request);
+    void delete(PlanItDeleteRequest request);
 }

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class DeletePlanRequest {
+public class PlanItDeleteRequest {
     @Min(1)
     @NotBlank
     private int scheduleId;

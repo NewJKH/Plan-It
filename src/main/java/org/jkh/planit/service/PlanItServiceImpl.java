@@ -1,52 +1,56 @@
 package org.jkh.planit.service;
 
 import lombok.RequiredArgsConstructor;
-import org.jkh.planit.domain.Plan;
-import org.jkh.planit.domain.User;
-import org.jkh.planit.dto.request.CreatePlanRequest;
-import org.jkh.planit.dto.request.DeletePlanRequest;
-import org.jkh.planit.dto.request.UpdatePlanRequest;
-import org.jkh.planit.dto.response.PlanResponse;
+import org.jkh.planit.dto.request.PlanItCreateRequest;
+import org.jkh.planit.dto.request.PlanItDeleteRequest;
+import org.jkh.planit.dto.request.PlanItUpdateRequest;
+import org.jkh.planit.dto.response.PlanItResponse;
+import org.jkh.planit.entity.Plan;
+import org.jkh.planit.entity.User;
 import org.jkh.planit.exception.*;
 import org.jkh.planit.repository.PlanItRepository;
 import org.jkh.planit.repository.UserRepository;
 import org.jkh.planit.util.DateTimeUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.sql.Timestamp;
 import java.util.Optional;
 
 @Transactional
 @Service
 @RequiredArgsConstructor
-public class PlanService implements PlanItService{
+public class PlanItServiceImpl implements PlanItService{
     private final PlanItRepository planItRepository;
     private final UserRepository userRepository;
 
     @Override
-    public PlanResponse savePlan(CreatePlanRequest request) {
+    public PlanItResponse savePlan(PlanItCreateRequest request) {
         Plan plan = new Plan(request.getUserId(), request.getTitle(), request.getContents());
         return planItRepository.save(plan);
     }
 
     @Override
-    public Page<PlanResponse> getPlansByDate(String date, Pageable pageable) {
-        Timestamp timestamp = DateTimeUtil.toTimestamp(date);
-        return planItRepository.getPlansByDate(timestamp,pageable);
+    public Page<PlanItResponse> getPlans(String date, String username, Pageable pageable) {
+        if (date != null) {
+            return planItRepository.getPlansByDate(
+                    DateTimeUtil.toTimestamp(date),
+                    pageable
+            );
+        }
+        else if (username != null) {
+            return userRepository.findByUsername(username)
+                    .map(user-> planItRepository.getPlansByUserId(user.getUserId(),pageable))
+                    .orElseThrow(UserNotFoundException::new);
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
     @Override
-    public Page<PlanResponse> getPlansByUsername(String username, Pageable pageable) {
-        return userRepository.findByUsername(username)
-                .map(user-> planItRepository.getPlansByUserId(user.getUserId(),pageable))
-                .orElseThrow(UserNotFoundException::new);
-    }
-
-    @Override
-    public PlanResponse updatePlan(UpdatePlanRequest request) {
+    public PlanItResponse updatePlan(PlanItUpdateRequest request) {
         if (request.getContents().isEmpty()) {
             throw new EmptyContentException();
         }
@@ -57,7 +61,7 @@ public class PlanService implements PlanItService{
         }
 
         return planItRepository.get(request.getScheduleId())
-                .map(plan -> new PlanResponse(
+                .map(plan -> new PlanItResponse(
                         plan.getScheduleId(),
                         plan.getUserId(),
                         plan.getTitle(),
@@ -67,7 +71,7 @@ public class PlanService implements PlanItService{
 
 
     @Override
-    public void delete(DeletePlanRequest request) {
+    public void delete(PlanItDeleteRequest request) {
         Optional<Plan> planOpt = planItRepository.get(request.getScheduleId());
         if ( planOpt.isEmpty() ){
             throw new PlanNotFoundException();

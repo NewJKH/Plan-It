@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PlanResponse {
+public class PlanItResponse {
     private final int scheduleId;
     private final int userId;
     private String title;

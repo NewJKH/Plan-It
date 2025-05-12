@@ -9,16 +9,18 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CreatePlanRequest {
+public class PlanItUpdateRequest {
+    @NotNull
+    @Min(1)
+    private int scheduleId;
 
     @NotNull
     @Min(1)
     private int userId;
 
     @NotBlank
-    private String title;
-
-    @NotBlank
+    private String userPw;
+    
     @Size(max = 200, message = "일정은 200자 이내여야 합니다.")
     private String contents;
 }

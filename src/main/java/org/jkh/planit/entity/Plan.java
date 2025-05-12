@@ -1,4 +1,4 @@
-package org.jkh.planit.domain;
+package org.jkh.planit.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

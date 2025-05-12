@@ -1,8 +1,8 @@
 package org.jkh.planit.repository;
 
-import org.jkh.planit.domain.Plan;
-import org.jkh.planit.dto.request.UpdatePlanRequest;
-import org.jkh.planit.dto.response.PlanResponse;
+import org.jkh.planit.dto.request.PlanItUpdateRequest;
+import org.jkh.planit.dto.response.PlanItResponse;
+import org.jkh.planit.entity.Plan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,15 +14,15 @@ public interface PlanItRepository {
 
     Optional<Plan> get(int schedulerId);
 
-    PlanResponse save(Plan plan);
+    PlanItResponse save(Plan plan);
 
-    List<PlanResponse> getPlansByDate(Timestamp timestamp);
-    Page<PlanResponse> getPlansByDate(Timestamp timestamp, Pageable pageable);
+    List<PlanItResponse> getPlansByDate(Timestamp timestamp);
+    Page<PlanItResponse> getPlansByDate(Timestamp timestamp, Pageable pageable);
 
-    List<PlanResponse> getPlansByUserId(int userId);
-    Page<PlanResponse> getPlansByUserId(int userId,  Pageable pageable);
+    List<PlanItResponse> getPlansByUserId(int userId);
+    Page<PlanItResponse> getPlansByUserId(int userId, Pageable pageable);
 
-    int update(UpdatePlanRequest request);
+    int update(PlanItUpdateRequest request);
 
     int deletePlan(int scheduleId);
 }

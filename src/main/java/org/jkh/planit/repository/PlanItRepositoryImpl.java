@@ -98,7 +98,29 @@ public class PlanItRepositoryImpl implements PlanItRepository {
         int total = jdbcTemplate.queryForObject(" " +
                 "SELECT COUNT(*) " +
                 "FROM schedules " +
-                "WHERE created_at > ?", Integer.class, userId);
+                "WHERE user_id = ?", Integer.class, userId);
+
+        return new PageImpl<>(list,pageable,total);
+    }
+
+    public Page<PlanItResponse> getPlanByUsername(String username, Pageable pageable){
+        int pageSize = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+
+        List<PlanItResponse> list = jdbcTemplate.query(" "+
+                "SELECT s.* "+
+                "FROM schedules s "+
+                    "JOIN users u ON s.user_id = u.user_id "+
+                "WHERE u.username = ? "+
+                "ORDER BY s.schedule_id "+
+                "LIMIT ? "+
+                "OFFSET ?", planResponseRowMapper(), username, pageSize, offset);
+
+        int total = jdbcTemplate.queryForObject(" "+
+                "SELECT COUNT(*) " +
+                "FROM schedules s " +
+                    "JOIN users u ON s.user_id = u.user_id " +
+                "WHERE u.username = ?", Integer.class, username);
 
         return new PageImpl<>(list,pageable,total);
     }

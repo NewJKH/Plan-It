@@ -7,9 +7,11 @@ import org.jkh.planit.dto.request.PlanItUpdateRequest;
 import org.jkh.planit.dto.response.PlanItResponse;
 import org.jkh.planit.entity.Plan;
 import org.jkh.planit.entity.User;
-import org.jkh.planit.exception.*;
+import org.jkh.planit.exception.EmptyContentException;
+import org.jkh.planit.exception.NotMatchedPasswordException;
+import org.jkh.planit.exception.PlanNotFoundException;
+import org.jkh.planit.exception.UserNotMatchedException;
 import org.jkh.planit.repository.PlanItRepository;
-import org.jkh.planit.repository.UserRepository;
 import org.jkh.planit.util.DateTimeUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +27,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PlanItServiceImpl implements PlanItService{
     private final PlanItRepository planItRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Override
     public PlanItResponse savePlan(PlanItCreateRequest request) {
@@ -42,9 +44,9 @@ public class PlanItServiceImpl implements PlanItService{
             );
         }
         else if (username != null) {
-            return userRepository.findByUsername(username)
-                    .map(user-> planItRepository.getPlansByUserId(user.getUserId(),pageable))
-                    .orElseThrow(UserNotFoundException::new);
+            return planItRepository.getPlansByUserId(
+                    userService.getByUsername(username).getUserId(),
+                    pageable);
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
@@ -81,11 +83,7 @@ public class PlanItServiceImpl implements PlanItService{
             throw new UserNotMatchedException();
         }
 
-        Optional<User> userOpt = userRepository.findById(request.getUserId());
-        if ( userOpt.isEmpty()){
-            throw new UserNotFoundException();
-        }
-        User user = userOpt.get();
+        User user = userService.getByUserId(request.getUserId());
         if ( !validatePw(user.getUserPwHash(), request.getUserPw())){
             throw new NotMatchedPasswordException();
         }

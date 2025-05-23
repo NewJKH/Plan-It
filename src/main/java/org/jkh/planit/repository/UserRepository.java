@@ -2,6 +2,7 @@ package org.jkh.planit.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.jkh.planit.entity.User;
+import org.jkh.planit.exception.UserNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -27,6 +28,15 @@ public class UserRepository {
                         "FROM users " +
                         "WHERE username = ?",userRowMapper(),username).stream()
                 .findFirst();
+    }
+
+    public User findByUsernameOrThrow(String username) {
+        return this.findByUsername(username)
+                .orElseThrow(UserNotFoundException::new);}
+
+    public User findByIdOrThrow(int userId) {
+        return this.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
     }
 
     private RowMapper<User> userRowMapper(){

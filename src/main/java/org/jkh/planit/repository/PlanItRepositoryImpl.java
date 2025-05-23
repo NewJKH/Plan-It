@@ -1,9 +1,9 @@
 package org.jkh.planit.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.jkh.planit.dto.request.PlanItUpdateRequest;
 import org.jkh.planit.dto.response.PlanItResponse;
 import org.jkh.planit.entity.Plan;
+import org.jkh.planit.exception.PlanNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +25,12 @@ public class PlanItRepositoryImpl implements PlanItRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
+    public Plan getPlansByScheduleId(int scheduleId) {
+        return this.get(scheduleId)
+                .orElseThrow(PlanNotFoundException::new);
+    }
+
+    @Override
     public Optional<Plan> get(int schedulerId) {
         return jdbcTemplate.query(" "+
                 "SELECT * "+
@@ -33,7 +39,7 @@ public class PlanItRepositoryImpl implements PlanItRepository {
     }
 
     @Override
-    public PlanItResponse save(Plan plan) {
+    public void save(Plan plan) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
 
         simpleJdbcInsert.withTableName("schedules").usingGeneratedKeyColumns("schedule_id");
@@ -45,28 +51,19 @@ public class PlanItRepositoryImpl implements PlanItRepository {
         param.put("created_at",plan.getCreateDate());
         param.put("modified_at",plan.getModifyDate());
         Number key = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource(param));
-
-        return new PlanItResponse(key.intValue(),plan.getUserId(), plan.getTitle(), plan.getContents());
+        new PlanItResponse(key.intValue(),plan.getUserId(), plan.getTitle(), plan.getContents());
     }
 
     @Override
-    public List<PlanItResponse> getPlansByDate(Timestamp timestamp) {
-        return jdbcTemplate.query(" "+
-                "SELECT * " +
-                "FROM schedules " +
-                "WHERE created_at > ?", planResponseRowMapper(),timestamp);
-    }
-
-    @Override
-    public Page<PlanItResponse> getPlansByDate(Timestamp timestamp, Pageable pageable) {
+    public Page<Plan> findPlansByDate(Timestamp timestamp, Pageable pageable) {
         int pageSize = pageable.getPageSize();
         int offset = (int) pageable.getOffset();
 
-        List<PlanItResponse> list = jdbcTemplate.query(" "+
+        List<Plan> list = jdbcTemplate.query(" "+
                 "SELECT * " +
                 "FROM schedules " +
                 "WHERE created_at > ? " +
-                "ORDER BY created_at DESC LIMIT ? OFFSET ?", planResponseRowMapper(),timestamp,pageSize,offset);
+                "ORDER BY created_at DESC LIMIT ? OFFSET ?", planRowMapper(),timestamp,pageSize,offset);
 
         int total = jdbcTemplate.queryForObject(" " +
                 "SELECT COUNT(*) " +
@@ -77,23 +74,15 @@ public class PlanItRepositoryImpl implements PlanItRepository {
     }
 
     @Override
-    public List<PlanItResponse> getPlansByUserId(int userId) {
-        return jdbcTemplate.query(" "+
-                "SELECT * " +
-                "FROM schedules " +
-                "WHERE user_id = ?", planResponseRowMapper(),userId);
-    }
-
-    @Override
-    public Page<PlanItResponse> getPlansByUserId(int userId, Pageable pageable) {
+    public Page<Plan> findPlansByUserId(int userId, Pageable pageable) {
         int pageSize = pageable.getPageSize();
         int offset = (int) pageable.getOffset();
 
-        List<PlanItResponse> list = jdbcTemplate.query(" "+
+        List<Plan> list = jdbcTemplate.query(" "+
                 "SELECT * " +
                 "FROM schedules " +
                 "WHERE user_id = ? " +
-                "ORDER BY schedule_id LIMIT ? OFFSET ?", planResponseRowMapper(),userId,pageSize,offset);
+                "ORDER BY schedule_id LIMIT ? OFFSET ?", planRowMapper(),userId,pageSize,offset);
 
         int total = jdbcTemplate.queryForObject(" " +
                 "SELECT COUNT(*) " +
@@ -103,18 +92,19 @@ public class PlanItRepositoryImpl implements PlanItRepository {
         return new PageImpl<>(list,pageable,total);
     }
 
-    public Page<PlanItResponse> getPlanByUsername(String username, Pageable pageable){
+    @Deprecated
+    public Page<Plan> getPlanByUsername(String username, Pageable pageable){
         int pageSize = pageable.getPageSize();
         int offset = (int) pageable.getOffset();
 
-        List<PlanItResponse> list = jdbcTemplate.query(" "+
+        List<Plan> list = jdbcTemplate.query(" "+
                 "SELECT s.* "+
                 "FROM schedules s "+
                     "JOIN users u ON s.user_id = u.user_id "+
                 "WHERE u.username = ? "+
                 "ORDER BY s.schedule_id "+
                 "LIMIT ? "+
-                "OFFSET ?", planResponseRowMapper(), username, pageSize, offset);
+                "OFFSET ?", planRowMapper(), username, pageSize, offset);
 
         int total = jdbcTemplate.queryForObject(" "+
                 "SELECT COUNT(*) " +
@@ -126,7 +116,7 @@ public class PlanItRepositoryImpl implements PlanItRepository {
     }
 
     @Override
-    public int update(PlanItUpdateRequest plan) {
+    public int update(Plan plan) {
         return jdbcTemplate.update(" "+
                 "UPDATE schedules "+
                 "SET content = ?, modified_at = ?"+
@@ -149,15 +139,6 @@ public class PlanItRepositoryImpl implements PlanItRepository {
                 rs.getString("content"),
                 rs.getTimestamp("created_at"),
                 rs.getTimestamp("modified_at")
-        );
-    }
-
-    private RowMapper<PlanItResponse> planResponseRowMapper(){
-        return (rs, rowNum) -> new PlanItResponse(
-                rs.getInt("schedule_id"),
-                rs.getInt("user_id"),
-                rs.getString("title"),
-                rs.getString("content")
         );
     }
 }

@@ -8,9 +8,6 @@ import org.jkh.planit.dto.request.PlanItUpdateRequest;
 import org.jkh.planit.dto.response.PlanItResponse;
 import org.jkh.planit.service.PlanItService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,17 +51,35 @@ public class PlanItController {
      *
      * @param date     (옵션) 조회할 날짜 필터
      * @param username (옵션) 특정 유저의 일정만 필터링
-     * @param pageable 페이지 및 정렬 정보 (기본: created_at DESC, 10개씩)
+     * @param page (옵션) 페이지 번호
+     * @param size (옵션) 한 페이지당 출력 갯수
      * @return 200 OK + 페이징된 일정 목록
      */
     @GetMapping
     public ResponseEntity<Page<PlanItResponse>> getPlans(
             @RequestParam(required = false) String date,
             @RequestParam(required = false) String username,
-            @PageableDefault(size = 10, sort = "created_at", direction = Sort.Direction.DESC) Pageable pageable) {
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "5") Integer size) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(service.getPlans(date, username, pageable));
+                .body(service.getPlans(date, username, page, size));
+    }
+
+    /**
+     * 일정 목록을 조회합니다.
+     *
+     * optional 쿼리 파라미터인 date, username 을 기준으로 필터링할 수 있으며,
+     * 페이지네이션이 적용됩니다.
+     *
+     * @param id 단건 일정 번호
+     * @return 200 OK + 페이징된 일정 목록
+     */
+    @GetMapping("{id}")
+    public ResponseEntity<PlanItResponse> getPlans(@PathVariable int id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(service.findByScheduleId(id));
     }
 
     /**

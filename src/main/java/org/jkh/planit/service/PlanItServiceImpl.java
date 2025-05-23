@@ -12,9 +12,12 @@ import org.jkh.planit.exception.NotMatchedPasswordException;
 import org.jkh.planit.exception.PlanNotFoundException;
 import org.jkh.planit.exception.UserNotMatchedException;
 import org.jkh.planit.repository.PlanItRepository;
+import org.jkh.planit.repository.UserRepository;
 import org.jkh.planit.util.DateTimeUtil;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,42 +25,50 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
-@Transactional
 @Service
 @RequiredArgsConstructor
 public class PlanItServiceImpl implements PlanItService{
     private final PlanItRepository planItRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     @Override
     public PlanItResponse savePlan(PlanItCreateRequest request) {
         Plan plan = new Plan(request.getUserId(), request.getTitle(), request.getContents());
-        return planItRepository.save(plan);
+        planItRepository.save(plan);
+        return PlanItResponse.toDto(planItRepository.getPlansByScheduleId(plan.getScheduleId()));
     }
 
     @Override
-    public Page<PlanItResponse> getPlans(String date, String username, Pageable pageable) {
-        if (date != null) {
-            return planItRepository.getPlansByDate(
-                    DateTimeUtil.toTimestamp(date),
-                    pageable
-            );
+    public Page<PlanItResponse> getPlans(String date, String username, int page ,int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "create_at"));
+
+        if (date == null && username == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "date 또는 username 중 하나는 반드시 필요합니다.");
         }
-        else if (username != null) {
-            return planItRepository.getPlansByUserId(
-                    userService.getByUsername(username).getUserId(),
-                    pageable);
+
+        if( date != null ){
+            return planItRepository.findPlansByDate(DateTimeUtil.toTimestamp(date), pageable)
+                    .map(PlanItResponse::toDto);
+        }else {
+            User user = userRepository.findByUsernameOrThrow(username);
+            return planItRepository.findPlansByUserId(user.getUserId(), pageable)
+                    .map(PlanItResponse::toDto);
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
+    @Override
+    public PlanItResponse findByScheduleId(int scheduleId){
+        return PlanItResponse.toDto(planItRepository.getPlansByScheduleId(scheduleId));
+    }
+
+    @Transactional
     @Override
     public PlanItResponse updatePlan(PlanItUpdateRequest request) {
         if (request.getContents().isEmpty()) {
             throw new EmptyContentException();
         }
 
-        int row = planItRepository.update(request);
+        int row = planItRepository.update(planItRepository.getPlansByScheduleId(request.getScheduleId()));
         if (row == 0) {
             throw new PlanNotFoundException();
         }
@@ -83,15 +94,12 @@ public class PlanItServiceImpl implements PlanItService{
             throw new UserNotMatchedException();
         }
 
-        User user = userService.getByUserId(request.getUserId());
+        User user = userRepository.findByIdOrThrow(request.getUserId());
         if ( !validatePw(user.getUserPwHash(), request.getUserPw())){
             throw new NotMatchedPasswordException();
         }
 
-        int row = planItRepository.deletePlan(request.getScheduleId());
-        if ( row == 0){
-            throw new PlanNotFoundException();
-        }
+        planItRepository.deletePlan(plan.getScheduleId());
     }
 
     private boolean validatePw(String userPwHash, String requestPw){

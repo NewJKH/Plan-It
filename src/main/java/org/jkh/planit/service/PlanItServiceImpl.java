@@ -10,7 +10,6 @@ import org.jkh.planit.entity.User;
 import org.jkh.planit.exception.EmptyContentException;
 import org.jkh.planit.exception.NotMatchedPasswordException;
 import org.jkh.planit.exception.PlanNotFoundException;
-import org.jkh.planit.exception.UserNotMatchedException;
 import org.jkh.planit.repository.PlanItRepository;
 import org.jkh.planit.repository.UserRepository;
 import org.jkh.planit.util.DateTimeUtil;
@@ -89,13 +88,9 @@ public class PlanItServiceImpl implements PlanItService{
         if ( planOpt.isEmpty() ){
             throw new PlanNotFoundException();
         }
-        Plan plan = planOpt.get();
-        if ( plan.getUserId() != request.getUserId() ){
-            throw new UserNotMatchedException();
-        }
-
+        Plan plan = planItRepository.getPlansByScheduleId(request.getScheduleId());
         User user = userRepository.findByIdOrThrow(request.getUserId());
-        if ( !validatePw(user.getUserPwHash(), request.getUserPw())){
+        if ( !validatePw(user.getUserPwHash(), request.getUserPw())){ // 이게 비밀번호 검증 ㅠㅠ
             throw new NotMatchedPasswordException();
         }
 

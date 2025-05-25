@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class GlobalException {
+public class GlobalExceptionHandler {
     /**
      * 요청 본문의 내용이 비어 있을 경우 발생하는 사용자 정의 예외를 처리합니다.
      *
